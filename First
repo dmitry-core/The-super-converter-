@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Конвертер валют на JavaScript</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { margin-top: 15px; background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        .result { margin-top: 20px; text-align: center; font-size: 1.2em; color: #007bff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Конвертер валют</h2>
+        <label for="amount">Сумма:</label>
+        <input type="number" id="amount" value="1" min="0">
+
+        <label for="from_curr">Из валюты:</label>
+        <select id="from_curr">
+            <option value="USD">USD (Доллар)</option>
+            <option value="EUR">EUR (Евро)</option>
+            <option value="RUB" selected>RUB (Рубль)</option>
+        </select>
+
+        <label for="to_curr">В валюту:</label>
+        <select id="to_curr">
+            <option value="USD" selected>USD (Доллар)</option>
+            <option value="EUR">EUR (Евро)</option>
+            <option value="RUB">RUB (Рубль)</option>
+        </select>
+
+        <button onclick="convertCurrency()">Конвертировать</button>
+
+        <div class="result" id="resultDiv"></div>
+    </div>
+
+    <script>
+        async function convertCurrency() {
+            const amount = document.getElementById('amount').value;
+            const from = document.getElementById('from_curr').value;
+            const to = document.getElementById('to_curr').value;
+            const resultDiv = document.getElementById('resultDiv');
+
+            try {
+                const response = await fetch(`https://exchangerate-api.com{from}`);
+                const data = await response.json();
+                const rate = data.rates[to];
+                
+                if (rate) {
+                    const total = (amount * rate).toFixed(2);
+                    resultDiv.innerText = `Результат: ${total} ${to}`;
+                } else {
+                    resultDiv.innerText = "Ошибка: Валюта не найдена";
+                }
+            } catch (error) {
+                resultDiv.innerText = "Ошибка соединения с API";
+            }
+        }
+    </script>
+</body>
+</html>
