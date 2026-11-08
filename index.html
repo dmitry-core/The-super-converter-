@@ -2,36 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конвертер валют на JavaScript</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автономный конвертер валют</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; }
-        h2 { text-align: center; margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select, button { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { margin-top: 15px; background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        .result { margin-top: 20px; text-align: center; font-size: 1.2em; color: #007bff; font-weight: bold; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; 
+            background-color: #f4f4f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            width: 320px; 
+        }
+        h2 { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            color: #333;
+        }
+        label { 
+            display: block; 
+            margin-top: 12px; 
+            font-weight: bold; 
+            color: #555;
+        }
+        input, select, button { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Защита от зума на iPad */
+        }
+        button { 
+            margin-top: 20px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: background 0.2s;
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        .result { 
+            margin-top: 20px; 
+            text-align: center; 
+            font-size: 1.3em; 
+            color: #28a745; 
+            font-weight: bold; 
+            min-height: 30px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Конвертер валют</h2>
+        
         <label for="amount">Сумма:</label>
         <input type="number" id="amount" value="1" min="0">
 
         <label for="from_curr">Из валюты:</label>
         <select id="from_curr">
+            <option value="RUB" selected>RUB (Рубль)</option>
             <option value="USD">USD (Доллар)</option>
             <option value="EUR">EUR (Евро)</option>
-            <option value="RUB" selected>RUB (Рубль)</option>
+            <option value="CNY">CNY (Юань)</option>
         </select>
 
         <label for="to_curr">В валюту:</label>
         <select id="to_curr">
+            <option value="RUB">RUB (Рубль)</option>
             <option value="USD" selected>USD (Доллар)</option>
             <option value="EUR">EUR (Евро)</option>
-            <option value="RUB">RUB (Рубль)</option>
+            <option value="CNY">CNY (Юань)</option>
         </select>
 
         <button onclick="convertCurrency()">Конвертировать</button>
@@ -40,26 +92,31 @@
     </div>
 
     <script>
-        async function convertCurrency() {
-            const amount = document.getElementById('amount').value;
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value);
             const from = document.getElementById('from_curr').value;
             const to = document.getElementById('to_curr').value;
             const resultDiv = document.getElementById('resultDiv');
 
-            try {
-                const response = await fetch(`https://exchangerate-api.com{from}`);
-                const data = await response.json();
-                const rate = data.rates[to];
-                
-                if (rate) {
-                    const total = (amount * rate).toFixed(2);
-                    resultDiv.innerText = `Результат: ${total} ${to}`;
-                } else {
-                    resultDiv.innerText = "Ошибка: Валюта не найдена";
-                }
-            } catch (error) {
-                resultDiv.innerText = "Ошибка соединения с API";
+            if (isNaN(amount) || amount <= 0) {
+                resultDiv.innerText = "Введите сумму";
+                return;
             }
+
+            // Фиксированные курсы валют (база к Рублю)
+            const ratesInRUB = {
+                "RUB": 1.0,
+                "USD": 95.50,  // 1 доллар = 95.5 руб
+                "EUR": 102.30, // 1 евро = 102.3 руб
+                "CNY": 13.20   // 1 юань = 13.2 руб
+            };
+
+            // Переводим сумму из исходной валюты в рубли, а затем в целевую валюту
+            const amountInRUB = amount * ratesInRUB[from];
+            const finalResult = amountInRUB / ratesInRUB[to];
+
+            // Выводим результат на экран с округлением до 2 знаков
+            resultDiv.innerText = `Результат: ${finalResult.toFixed(2)} ${to}`;
         }
     </script>
 </body>
